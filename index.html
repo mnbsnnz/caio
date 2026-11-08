@@ -184,6 +184,66 @@ footer{max-width:1260px;margin:0 auto;padding:25px var(--page-gutter)}
 .ciao-login-submit{width:100%;border:0;border-radius:9px;padding:14px;background:#742e40;color:white;font:600 14px Manrope,Arial,sans-serif;cursor:pointer;margin-top:24px}
 .ciao-login-dialog .ciao-login-notice{margin:12px 0 0;font-size:12px}
 @media(max-width:760px){.ciao-login-trigger{padding:9px 14px;font-size:12px}.ciao-login-dialog{padding:28px 22px}.header{flex-wrap:wrap}.ciao-login-trigger{margin-left:auto}}
+</style><style>
+/* Mobile alignment correction for services: safe inset and no clipped text */
+.ciao-services-v2,.ciao-services-v2 *{box-sizing:border-box}
+.ciao-services-v2{min-width:0}
+.ciao-services-v2 .svc-top>div:first-child{min-width:0}
+@media(max-width:700px){
+ .ciao-services-v2.section{width:100%;max-width:100%;margin:0 auto;padding-left:22px!important;padding-right:22px!important;overflow:visible}
+ .ciao-services-v2 .svc-top{display:flex;flex-direction:column;align-items:stretch;gap:20px}
+ .ciao-services-v2 .svc-top>div:first-child{width:100%;padding:0 2px}
+ .ciao-services-v2 .eyebrow{padding-left:0;margin-left:0}
+ .ciao-services-v2 h2{font-size:clamp(30px,8vw,40px);line-height:1.12;letter-spacing:-.8px;overflow-wrap:break-word}
+ .ciao-services-v2 .svc-sub{font-size:14px;line-height:1.55}
+ .ciao-services-v2 .svc-price{display:flex;flex-direction:column;align-items:flex-start;width:100%;min-width:0;padding:16px 18px;gap:9px}
+ .ciao-services-v2 .svc-price>span{font-size:12px}
+ .ciao-services-v2 .svc-price strong{font-size:29px;white-space:nowrap;line-height:1.15}
+ .ciao-services-v2 .svc-price a{width:100%;font-size:13px;line-height:1.4;white-space:normal;padding:12px 10px;margin-top:2px}
+ .ciao-services-v2 .svc-list{display:grid;grid-template-columns:minmax(0,1fr);width:100%;margin:0;border-left:0;border-right:0}
+ .ciao-services-v2 .svc-item{width:100%;padding:17px 3px;gap:15px;border-right:0;min-width:0}
+ .ciao-services-v2 .svc-item>div{flex:1;min-width:0}
+ .ciao-services-v2 .svc-n{width:25px;flex:0 0 25px}
+ .ciao-services-v2 .svc-item h3{font-size:16px;line-height:1.35;overflow-wrap:break-word}
+ .ciao-services-v2 .svc-item p{font-size:13px;line-height:1.55;overflow-wrap:break-word}
+ .ciao-services-v2 .svc-bottom{min-width:0;overflow-wrap:break-word}
+}
+@media(max-width:360px){.ciao-services-v2.section{padding-left:17px!important;padding-right:17px!important}}
+</style><style>
+/* Site-wide mobile safe gutters: prevent clipped headings, cards and buttons. */
+@media (max-width: 700px) {
+  html,body { max-width:100%; overflow-x:clip; }
+  *,*::before,*::after { box-sizing:border-box; }
+  :root { --ciao-mobile-gutter: max(20px, env(safe-area-inset-left, 0px)); }
+  main { width:100%; min-width:0; }
+  header.header, main > section, footer {
+    box-sizing:border-box;
+    max-width:100%;
+  }
+  .header, .hero, .university-strip, .life.section, .ciao-services-v2.section,
+  .funding.section, .audience.section, .ciao-photo-break, footer {
+    padding-left: max(22px, env(safe-area-inset-left, 0px)) !important;
+    padding-right: max(22px, env(safe-area-inset-right, 0px)) !important;
+  }
+  .hero-copy,.hero-art,.section-heading,.life-editorial,.funding-top,.funding-benefits,
+  .audience-list,.closing,.ciao-ending-frame,.university-marquee,.university-strip-heading,
+  .svc-top,.svc-list,.svc-bottom {min-width:0;max-width:100%;}
+  .hero h1,.section h2,.section h3,.hero-copy p,.section-heading p,
+  .funding p,.audience p,.closing p,.life p,.svc-top p {
+    max-width:100%;overflow-wrap:break-word;word-break:normal;
+  }
+  img,svg,video {max-width:100%;height:auto;}
+  .ciao-services-v2 .svc-price {max-width:100%;}
+  .ciao-services-v2 .svc-price strong {white-space:normal;}
+  .ciao-services-v2 .svc-price a {max-width:100%;overflow-wrap:anywhere;}
+  .ciao-ending-frame {margin-left:auto;margin-right:auto;}
+}
+@media (max-width: 360px) {
+ .header,.hero,.university-strip,.life.section,.ciao-services-v2.section,
+ .funding.section,.audience.section,.ciao-photo-break,footer {
+   padding-left:18px!important;padding-right:18px!important;
+ }
+}
 </style></head>
 <body>
 <header class="header"><a aria-label="CIAO UNI" class="wordmark" href="#home">ciao<span class="wordmark-dot">.</span> <span class="wordmark-uni">uni</span></a><nav aria-label="Навигация" data-i18n-aria="navigation" id="main-nav"><a data-i18n="navLife" href="#life">Жизнь в Италии</a><a data-i18n="navServices" href="#services">Наши услуги</a><a data-i18n="navFunding" href="#funding">Стипендии</a><a data-i18n="navAudience" href="#for-you">Для кого</a></nav><button aria-controls="main-nav" aria-expanded="false" class="menu-toggle" data-i18n="menuLabel" id="menu-toggle">Меню</button><div aria-label="Язык" class="language" data-i18n-aria="language" role="group"><button aria-pressed="false" data-lang="kk">ҚАЗ</button><span aria-hidden="true">/</span><button aria-pressed="true" data-lang="ru">РУС</button></div><button type="button" class="ciao-login-trigger" id="ciao-login-trigger" aria-haspopup="dialog">Войти</button></header>
