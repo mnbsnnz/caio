@@ -325,6 +325,7 @@ const menuToggle=document.querySelector('#menu-toggle');const mainNav=document.q
 <button aria-label="Закрыть" class="ciao-x" id="ciao-legal-x" type="button">×</button><h2 id="ciao-legal-title"></h2><div id="ciao-legal-content"></div>
 </section>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 (()=>{
 const copy={ru:{login:'Войти',register:'Регистрация',heading:'Личный кабинет',introLogin:'Вход по номеру телефона и паролю.',introRegister:'Создайте пароль. Регистрация открывается после разрешения администратора.',phone:'Номер телефона',password:'Пароль',confirm:'Повторите пароль',help:'Для регистрации ваш номер должен быть заранее одобрен администратором.',unavailable:'Регистрация и вход станут доступны после подключения защищённой базы данных. Сейчас данные никуда не отправляются.',mismatch:'Пароли не совпадают.',invalid:'Введите номер телефона в международном формате.',privacy:'Конфиденциальность',terms:'Условия использования',refund:'Оплата и возврат',close:'Закрыть'},kk:{login:'Кіру',register:'Тіркелу',heading:'Жеке кабинет',introLogin:'Телефон нөмірі мен құпиясөз арқылы кіріңіз.',introRegister:'Құпиясөз ойлап табыңыз. Тіркелуге администратор рұқсат береді.',phone:'Телефон нөмірі',password:'Құпиясөз',confirm:'Құпиясөзді қайталаңыз',help:'Тіркелу үшін администратор сіздің нөміріңізге алдын ала рұқсат беруі керек.',unavailable:'Қауіпсіз дерекқор қосылған соң тіркелу мен кіру іске қосылады. Қазір деректер ешқайда жіберілмейді.',mismatch:'Құпиясөздер сәйкес келмейді.',invalid:'Телефон нөмірін халықаралық форматта енгізіңіз.',privacy:'Құпиялық саясаты',terms:'Пайдалану шарттары',refund:'Төлем және қайтару',close:'Жабу'}};
@@ -336,7 +337,44 @@ function sync(){const x=t();$('ciao-login-trigger').textContent=x.login;$('ciao-
 function setMode(m){mode=m;$('ciao-auth-confirm-wrap').hidden=m!=='register';$('ciao-auth-confirm').required=m==='register';$('ciao-auth-password').autocomplete=m==='register'?'new-password':'current-password';$('ciao-auth-message').textContent='';sync()}
 function open(el){el.hidden=false;document.body.style.overflow='hidden'}function close(el){el.hidden=true;if(overlay.hidden&&legalOverlay.hidden)document.body.style.overflow=''}
 $('ciao-login-trigger').addEventListener('click',()=>{setMode('login');open(overlay);$('ciao-auth-phone').focus()});$('ciao-auth-x').addEventListener('click',()=>close(overlay));document.querySelectorAll('[data-auth-tab]').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.authTab)));
-$('ciao-auth-form').addEventListener('submit',e=>{e.preventDefault();const number=$('ciao-auth-phone').value.replace(/[^0-9]/g,'');if(number.length<10||number.length>15){$('ciao-auth-message').textContent=t().invalid;return}if(mode==='register'&&$('ciao-auth-password').value!==$('ciao-auth-confirm').value){$('ciao-auth-message').textContent=t().mismatch;return}$('ciao-auth-message').textContent=t().unavailable;$('ciao-auth-password').value='';$('ciao-auth-confirm').value=''});
+// CIAO UNI Supabase authentication. The admin authorization is enforced by an Edge Function.
+const CIAO_SUPABASE_URL='https://hiysneqyaclenaosirqu.supabase.co';
+const CIAO_SUPABASE_ANON_KEY='sb_publishable_9-u0n4p6rbrOHrMlPBpP5A_ERrlwF5w';
+const ciaoDb=window.supabase?.createClient(CIAO_SUPABASE_URL,CIAO_SUPABASE_ANON_KEY);
+const ciaoEmail=digits=>'phone-'+digits+'@accounts.ciao-uni.invalid';
+function ciaoMessage(ru,kk){$('ciao-auth-message').textContent=lang()==='kk'?kk:ru}
+$('ciao-auth-form').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const digits=$('ciao-auth-phone').value.replace(/\D/g,'');
+ const password=$('ciao-auth-password').value;
+ const btn=$('ciao-auth-submit');
+ if(digits.length<10||digits.length>15){$('ciao-auth-message').textContent=t().invalid;return}
+ if(mode==='register'&&password!==$('ciao-auth-confirm').value){$('ciao-auth-message').textContent=t().mismatch;return}
+ if(password.length<10){ciaoMessage('Пароль должен содержать минимум 10 символов.','Құпиясөз кемінде 10 таңбадан тұруы керек.');return}
+ if(!ciaoDb){ciaoMessage('Не загрузилась библиотека Supabase.','Supabase кітапханасы жүктелмеді.');return}
+ btn.disabled=true;
+ try{
+  if(mode==='register'){
+   const response=await fetch(CIAO_SUPABASE_URL+'/functions/v1/student-register',{
+    method:'POST',headers:{'Content-Type':'application/json','apikey':CIAO_SUPABASE_ANON_KEY},
+    body:JSON.stringify({phone:digits,password})
+   });
+   const body=await response.json().catch(()=>({}));
+   if(!response.ok)throw Error(body.error||'Ошибка регистрации ('+response.status+').');
+  }
+  const {data,error}=await ciaoDb.auth.signInWithPassword({email:ciaoEmail(digits),password});
+  if(error)throw Error(mode==='login'?'Неверный номер или пароль.':error.message);
+  const check=await ciaoDb.from('students').select('id,status,access_start,access_end').eq('auth_user_id',data.user.id).maybeSingle();
+  const today=new Date().toISOString().slice(0,10);
+  if(check.error||!check.data||check.data.status!=='active'||check.data.access_start>today||check.data.access_end<today){
+    await ciaoDb.auth.signOut();
+    throw Error('Доступ неактивен или срок действия закончился.');
+  }
+  ciaoMessage('Вход выполнен. Ваш доступ подтверждён.','Кіру сәтті өтті. Қолжетімділік расталды.');
+  // A student dashboard can be connected here. Do not claim that one exists yet.
+ }catch(err){$('ciao-auth-message').textContent=err.message||'Ошибка'}
+ finally{btn.disabled=false;$('ciao-auth-password').value='';$('ciao-auth-confirm').value=''}
+});
 document.querySelectorAll('[data-legal]').forEach(b=>b.addEventListener('click',()=>{$('ciao-legal-title').textContent=t()[b.dataset.legal];$('ciao-legal-content').innerHTML=legal[lang()][b.dataset.legal];open(legalOverlay)}));$('ciao-legal-x').addEventListener('click',()=>close(legalOverlay));[overlay,legalOverlay].forEach(el=>el.addEventListener('click',e=>{if(e.target===el)close(el)}));document.addEventListener('keydown',e=>{if(e.key==='Escape'){close(overlay);close(legalOverlay)}});
 new MutationObserver(sync).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>setTimeout(sync,0)));sync();
 })();
