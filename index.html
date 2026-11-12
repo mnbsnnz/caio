@@ -382,7 +382,7 @@ $('ciao-auth-form').addEventListener('submit',async e=>{
     throw Error('Доступ неактивен или срок действия закончился.');
   }
   ciaoMessage('Вход выполнен. Ваш доступ подтверждён.','Кіру сәтті өтті. Қолжетімділік расталды.');
-  // A student dashboard can be connected here. Do not claim that one exists yet.
+  window.location.assign('./student/');
  }catch(err){$('ciao-auth-message').textContent=err.message||'Ошибка'}
  finally{btn.disabled=false;$('ciao-auth-password').value='';$('ciao-auth-confirm').value=''}
 });
