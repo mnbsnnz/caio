@@ -365,8 +365,19 @@ $('ciao-auth-form').addEventListener('submit',async e=>{
   const {data,error}=await ciaoDb.auth.signInWithPassword({email:ciaoEmail(digits),password});
   if(error)throw Error(mode==='login'?'Неверный номер или пароль.':error.message);
   const check=await ciaoDb.from('students').select('id,status,access_start,access_end').eq('auth_user_id',data.user.id).maybeSingle();
-  const today=new Date().toISOString().slice(0,10);
-  if(check.error||!check.data||check.data.status!=='active'||check.data.access_start>today||check.data.access_end<today){
+  // Show database permission errors separately from an expired subscription.
+  if(check.error){
+    await ciaoDb.auth.signOut();
+    throw Error('Ошибка проверки доступа Supabase: '+check.error.message);
+  }
+  if(!check.data){
+    await ciaoDb.auth.signOut();
+    throw Error('Аккаунт создан, но запись участника недоступна. Проверьте политику SELECT для students.');
+  }
+  const now=Date.now();
+  const start=check.data.access_start ? new Date(check.data.access_start).getTime() : NaN;
+  const end=check.data.access_end ? new Date(check.data.access_end).getTime() : NaN;
+  if(check.data.status!=='active'||!Number.isFinite(start)||!Number.isFinite(end)||now<start||now>end){
     await ciaoDb.auth.signOut();
     throw Error('Доступ неактивен или срок действия закончился.');
   }
