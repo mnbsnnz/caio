@@ -159,9 +159,11 @@ function renderDetail(){
  section(L('Карьерные перспективы','Мансаптық мүмкіндіктер'),local(p,'career_prospects'));
  section(L('Кем можно работать','Қандай қызметте жұмыс істеуге болады'),local(p,'possible_jobs'));
  const admission=node('section','','catalog-admission');admission.append(node('h3',L('Требования к поступлению','Оқуға түсу талаптары')));
- admission.append(node('p',L('Академические требования зависят от предыдущего образования. Оригинальный текст Sapienza доступен ниже для проверки.','Академиялық талаптар алдыңғы біліміңізге байланысты. Тексеру үшін Sapienza түпнұсқа мәтіні төменде берілген.')));
+ admission.append(node('p',L('Требования взяты из официального документа Sapienza 2026/27.','Талаптар Sapienza университетінің 2026/27 жылғы ресми құжатынан алынған.')));
  if(p.admission_test_source)section(L('Дополнительное испытание (источник на английском)','Қосымша сынақ (ағылшынша дереккөз)'),p.admission_test_source);
  root.append(admission);
+ section(L('Какой бакалавриат подходит','Қандай бакалавриат сәйкес келеді'),local(p,'bachelor_requirements')||L('Перевод ещё не загружен.','Аударма әлі жүктелмеген.'));
+ section(L('Требования к английскому языку','Ағылшын тіліне қойылатын талаптар'),local(p,'english_requirements')||L('Перевод ещё не загружен.','Аударма әлі жүктелмеген.'));
  const sourceFields=[['bachelor_requirements_source',L('Требования к бакалавриату (оригинал)','Бакалавриат талаптары (түпнұсқа)')],['english_requirements_source',L('Требования к английскому (оригинал)','Ағылшын тілі талаптары (түпнұсқа)')]];
  const existing=sourceFields.filter(([key])=>p[key]&&String(p[key]).trim());
  if(existing.length){const details=node('details','','catalog-source-details');const summary=node('summary',L('Показать оригинальные требования Sapienza на английском','Sapienza талаптарының ағылшынша түпнұсқасын көрсету'));details.append(summary);existing.forEach(([key,title])=>{details.append(node('h4',title),node('p',p[key]))});root.append(details)}
