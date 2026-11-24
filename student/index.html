@@ -217,7 +217,7 @@ const by=new Map();programs.forEach(p=>{const x=stateOf(p);if(!x.w)return;const 
 if(!box.childNodes.length)box.append(node('p',T('Дат пока нет.','Күндер әлі жоқ.'),'catalog-status'))}
 const uniOf=p=>universities.find(u=>String(u.id)===String(p.university_id));
 const ruleOf=u=>u?(kz()?u.apply_rules_kz||u.apply_rules_ru:u.apply_rules_ru||u.apply_rules_kz)||'':'';
-const feeLine=p=>p.application_fee_eur!=null?Number(p.application_fee_eur)+' €':T('не указан, проверьте в объявлении','көрсетілмеген, хабарландырудан тексеріңіз');
+function feeLine(p){if(p.application_fee_eur!=null)return Number(p.application_fee_eur)+' €';const m=/оплата не указана \(объявление (20\d\d\/\d\d)\)/.exec(p.application_note_ru||'');if(m)return T('в шагах подачи оплата не указана ('+m[1]+')','өтінім беру қадамдарында төлем көрсетілмеген ('+m[1]+')');return T('не указан, проверьте в объявлении','көрсетілмеген, хабарландырудан тексеріңіз')}
 function feeBox(p){const b=node('div',null,'fee-box');b.append(node('strong',feeLine(p)));const x=ruleOf(uniOf(p));if(x)b.append(node('p',x));return b}
 function datesBlock(p){const out=[],ws=windowsOf(p),note=localized(p,'application_note');
 if(ws.length||note){out.push(node('h3',T('Подача заявки','Өтінім беру')),stateBox(p));if(ws.length){out.push(node('p',T('Все этапы для тех, кому нужна виза:','Виза қажет талапкерлердің барлық кезеңі:')));const ul=node('ul');ws.forEach(w=>ul.append(node('li',dmy(w.from)+' - '+dmy(w.to)+' · '+windowLabel(w))));out.push(ul)}if(note)out.push(node('p',note))}
